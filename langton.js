@@ -10,21 +10,19 @@ var c = document.getElementById('mainFrame'),
     time = 0,
     drawSize = 2,
     loop = 0,
-    pctWhite = 60,
+    pctWhite = 20,
     innerDir = $('#current');
 
 $('#fulfill').click(function(){fulfill();});
 $('#placeAnt').click(function(){placeAnt();});
 $('#start').click(function(){startTheGame();});
-$('#timer').change(function(){
-    time = $(this).val();
-});
+$('#timer').change(function(){time=$(this).val();});
 
 
 var fulfill = function(){
     var color;
-    for (var i = 0; i < size.height; i += drawSize) {
-        for (var j = 0; j < size.width; j += drawSize) {
+    for (var i = 0; i < size.width; i += drawSize) {
+        for (var j = 0; j < size.height; j += drawSize) {
             var r = Math.floor((Math.random() * 100) + 1);
             if(r <= pctWhite){
                 color = 'white';
@@ -38,17 +36,18 @@ var fulfill = function(){
 };
 
 var placeAnt = function(){
-    pos.x = size.height / 2;
-    pos.y = size.width / 2;
-    underColor = getColor();
-    ctx.fillStyle = "red";
-    ctx.fillRect(pos.x, pos.y, drawSize, drawSize);
+    pos.x = Math.ceil((size.width / 2) / drawSize) * drawSize;
+    pos.y = Math.ceil((size.height / 2) / drawSize) * drawSize;
+    getColor(function(color){
+        underColor = color;
+        ctx.fillStyle = "red";
+        ctx.fillRect(pos.x, pos.y, drawSize, drawSize);
+    });
 };
 
-var getColor = function(){
+var getColor = function(cb){
     var p = ctx.getImageData(pos.x, pos.y, 1, 1).data;
-    var color = (p[0] > 150) ? 'white' : 'black';
-    return color;
+    cb((p[0] > 150) ? 'white' : 'black');
 };
 
 var moveLeft = function(cb){
@@ -105,10 +104,12 @@ var draw = function(cb){
     var color = (underColor == 'black') ? 'white' : 'black';
     ctx.fillStyle = color;
     ctx.fillRect(oldPos.x, oldPos.y, drawSize, drawSize);
-    underColor = getColor();
-    ctx.fillStyle = "red";
-    ctx.fillRect(pos.x, pos.y, drawSize, drawSize);
-    cb();
+    getColor(function(color){
+        underColor = color;
+        ctx.fillStyle = "red";
+        ctx.fillRect(pos.x, pos.y, drawSize, drawSize);
+        cb();
+    });
 };
 
 var moveDir = function(cb){
@@ -128,9 +129,9 @@ var startTheGame = function(){
     innerDir.html(loop);
     moveDir(function(){
         draw(function(){
-            setTimeout(function(){
+            // setTimeout(function(){
                 startTheGame();
-            }, time);
+            // }, time);
         });
     });
 };
