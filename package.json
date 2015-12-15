@@ -1,0 +1,23 @@
+{
+  "name": "langton",
+  "version": "1.0.0",
+  "description": "langton ant.",
+  "main": "index.js",
+  "dependencies": {
+    "express": "^4.13.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kizdolf/langton.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kizdolf/langton/issues"
+  },
+  "homepage": "https://github.com/kizdolf/langton#readme"
+}
