@@ -5,15 +5,28 @@
         <title>langton ant.</title>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" media="screen" title="no title" charset="utf-8">
         <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <style>
+            input{
+                width: 60px;
+            }
+        </style>
     </head>
     <body>
         <h2>langton ant!</h2>
         <button id='fulfill'>create map</button>
-        <button id='placeAnt'>place Ant</button>
+        <!-- <button id='placeAnt'>place Ant</button> -->
         <button id='start'>Push the Ant!</button>
-        time between: <input type="number" id="timer" value="50"> en ms.
-        Square size <input type="number" id="zoom" value="2">
-        <div id="current"></div>
+        time between: <input type="number" id="timer" value="10"> en ms.
+        Square size <input type="number" id="zoom" value="4">
+        Map Height <input type="number" id="height" value="200">
+        Map Width <input type="number" id="width" value="200">
+        White percentage <input type="number" id="pctWhite" value="70">
+        <div id="current">
+            loop n°<span id="loop"></span> |
+            size: <span id="curHeight"></span>px/<span id="curWidth"></span>px |
+            white: <span id="curWhite"></span>% |
+            time loop: <span id="curTime"></span>ms
+        </div>
         <br>
         <canvas id="mainFrame">
             You don't support html5 canvas :/ sorry. Get a decent browser maybe?
