@@ -27,6 +27,7 @@ var height      = maxH,
     color;
 
 var pctWhite    = 1,
+    msWait      = 0,
     pxDim       = 1;
 
 var c           = document.getElementById('mainFrame'),
@@ -89,6 +90,7 @@ var startTheGame = function(){
     fill((!color), x, y);
     ++loop;
     pause||again(); //jshint ignore:line
+    x = y = dirAd = dirSub = null;
     return;
 };
 
@@ -108,7 +110,7 @@ var again = function(){
             count += stackLoop;
             l.html(count);
             startTheGame();
-        },0);
+        },msWait);
     }else startTheGame();
 };
 
@@ -138,6 +140,7 @@ var showLoader = function(b, cb){
 
 var fulfill = function(){
     pause = true;
+    count = 0;
     halfW = Math.ceil(width / 2);
     halfH = Math.ceil(height / 2);
     showLoader(true, function(){
@@ -168,7 +171,14 @@ $(document).ready(function(){
     $('#fulfill').click(function(){fulfill();});
     $('#timer').change(function(){
         time=$(this).val();
-        stackLoop = parseInt(time) * 100;
+        if (time <= 0){
+            loop = 0;
+            stackLoop = 1;
+        }else stackLoop = parseInt(time) * 100;
+        displayVals();
+    });
+    $('#msWait').change(function(){
+        msWait=$(this).val();
         displayVals();
     });
     // $('#placeAnt').click(function(){placeAnt();});
