@@ -7,12 +7,12 @@ var height = 800,
     up = 1, left = 2, bot = 3, right = 4,
     loop = 0,
     pos = {x: null, y: null},
-    direction = up,
+    dir = up,
     time = null,
     stackLoop = 3000;
 
 var pctWhite = 100,
-    squareSize = 1;
+    pxDim = 1;
 
 var toRedraw, color;
 
@@ -23,14 +23,15 @@ var c = document.getElementById('mainFrame'),
 $('#fulfill').click(function(){fulfill();});
 $('#timer').change(function(){
     time=$(this).val();
+    stackLoop = parseInt(time) * 100;
     displayVals();
 });
 // $('#placeAnt').click(function(){placeAnt();});
 $('#start').click(function(){startTheGame();});
 $('#zoom').change(function(){
-    fr.attr('height', (height * squareSize));
-    fr.attr('width', (width * squareSize));
-    squareSize = $(this).val();
+    fr.attr('height', (height * pxDim));
+    fr.attr('width', (width * pxDim));
+    pxDim = $(this).val();
     displayVals();
 });
 $('#height').change(function(){
@@ -62,86 +63,88 @@ var fulfill = function(){
         map[x] = {};
         for (var y = 0; y < height; y++) {
             var r = Math.floor((Math.random() * 100) + 1);
-            if(r <= pctWhite){
-                map[x][y] = {c: white};
-            }else{
-                map[x][y] = {c: black};
-            }
+            map[x][y] = (r <= pctWhite) ? {c: white} : {c: black};
         }
     }
-    fr.attr('height', (height * squareSize));
-    fr.attr('width', (width * squareSize));
+    fr.attr('height', (height * pxDim));
+    fr.attr('width', (width * pxDim));
     pos.x = Math.ceil(width / 2);
     pos.y = Math.ceil(height / 2);
-    direction = up;
+    dir = up;
     buildCanvas();
     displayVals();
 };
+
+
+var fill = function(x, y){ctx.fillRect(x, y, pxDim, pxDim); };
 
 var buildCanvas = function(cb){
     for (var x = 0; x < width; x++) {
         for (var y = 0; y < height; y++) {
             var color = map[x][y].c;
             ctx.fillStyle = color;
-            ctx.fillRect((x*squareSize), (y*squareSize), squareSize, squareSize);
+            fill((x*pxDim), (y*pxDim));
         }
     }
     placeAnt();
-    if(cb){
-        cb();
-    }
+    if(cb) cb();
 };
 
 var placeAnt = function(){
     ctx.fillStyle = antColor;
-    ctx.fillRect((pos.x*squareSize), (pos.y*squareSize), squareSize, squareSize);
+    fill((pos.x*pxDim), (pos.y*pxDim));
 };
 
 var reDraw = function(r){
     ctx.fillStyle = antColor;
-    ctx.fillRect((pos.x*squareSize), (pos.y*squareSize), squareSize, squareSize);
+    fill((pos.x*pxDim), (pos.y*pxDim));
     ctx.fillStyle = r.color;
-    ctx.fillRect((r.x*squareSize), (r.y*squareSize), squareSize, squareSize);
+    fill((r.x*pxDim), (r.y*pxDim));
 };
 
+//futur? build when the ant goes too far.
 var buildMore = function(){
-    if(pos.x <= 0) pos.x = 0;
-    if(pos.y <= 0) pos.y = 0;
-    if(pos.x >= height) pos.x = height - 1;
-    if(pos.y >= width) pos.y = width - 1;
+    pos.x = (pos.x <= 0) ? 0 : pos.x;
+    pos.y = (pos.y <= 0) ? 0 : pos.y;
+    pos.x = (pos.x >= height) ? height - 1 : pos.x;
+    pos.y = (pos.y >= width) ? width - 1 : pos.y;
 };
 
+//to do in binary operations. :)
 var startTheGame = function(){
     color = map[pos.x][pos.y].c;
-    if(color == white) direction = ((direction + 1) > 4) ? 1 : (direction + 1);
-    else direction = ((direction - 1) >= 1) ? (direction - 1) : 4;
-    map[pos.x][pos.y].c = (color == white) ? black : white;
-    toRedraw = {x: pos.x, y: pos.y, color: (color == white) ? black : white};
-    if(direction == up) pos.y = pos.y - 1;
-    else if (direction == left) pos.x = pos.x - 1;
-    else if (direction == bot) pos.y = pos.y + 1;
-    else pos.x = pos.x + 1;
+    var isWhite = (color == white), dirAd = (dir + 1), dirSub = (dir - 1), x = pos.x, y = pos.y;
+    dir = (isWhite) ? ((dirAd > 4) ? 1 : dirAd) : ((dirSub >= 1) ? dirSub : 4)
+    map[x][y].c = (isWhite) ? black : white;
+    toRedraw = {x: x, y: y, color: (isWhite) ? black : white};
+    pos.x = (dir == left) ? x - 1 : ((dir == right) ? x + 1 : x);
+    pos.y = (dir == up) ? y - 1 : ((dir == bot) ? y + 1 : y);
     reDraw(toRedraw);
     ++loop;
     again();
     return;
 };
 
+
+var halfW = Math.ceil(width / 2), halfH = Math.ceil(height / 2);
+var count = 0;
 var again = function(){
     if(!map[pos.x] || !map[pos.x][pos.y]){
-        console.log('reposition');
-        pos.x = Math.ceil(width / 2);
-        pos.y = Math.ceil(height / 2);
+        pos.x = halfW;
+        pos.y = halfH;
         setTimeout(function(){
             l.html(loop);
             startTheGame();
         },0);
     }
     if((loop % stackLoop) === 0){
+        loop = 0;
         //clear queue to not reach maximum call stack size.
         setTimeout(function(){
-            l.html(loop);
+            count += stackLoop;
+            l.html(count);
             startTheGame();
+            halfW = Math.ceil(width / 2); halfH = Math.ceil(height / 2);
         },0);
     }else{
         startTheGame();
