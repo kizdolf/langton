@@ -10,10 +10,10 @@ var height      = maxH,
     black       = false,
     white       = true,
     antColor    = 'red',
-    up          = 1,
-    left        = 2,
-    bot         = 3,
-    right       = 4,
+    up          = new Int8Array([1])[0],
+    left        = up << 1,
+    bot         = left << 1,
+    right       = bot << 1,
     map         = {},
     loop        = 0,
     pos         = {x: null, y: null},
@@ -165,14 +165,13 @@ var reDraw = function(r){
     fill(r.color, r.x, r.y);
 };
 
-//to do in binary operations. :)
 var startTheGame = function(){
     color       = map[pos.x][pos.y].c;
     var x       = pos.x,
     y           = pos.y,
     isWhite     = (color && white),
-    dirAd       = (dir + 1),
-    dirSub      = (dir - 1),
+    dirAd       = (dir << 1),
+    dirSub      = (dir >> 1),
     newCol      = (isWhite) ? black : white;
     dir         = (isWhite) ? ((dirAd > right) ? up : dirAd) : ((dirSub >= 1) ? dirSub : right);
     map[x][y].c = newCol;
