@@ -1,9 +1,14 @@
 'use strict';
+var maxW        = $('body').width() - 1,
+    maxH        = $(document).height() - $('#top').height() - 5;
 
-var height      = 830,
-    width       = 1920,
-    black       = 'black',
-    white       = 'white',
+$('#height').val(maxH);
+$('#width').val(maxW);
+
+var height      = maxH,
+    width       = maxW,
+    black       = false,
+    white       = true,
     antColor    = 'red',
     up          = 1,
     left        = 2,
@@ -14,13 +19,16 @@ var height      = 830,
     pos         = {x: null, y: null},
     dir         = up,
     time        = null,
-    stackLoop   = 300;
+    stackLoop   = 300,
+    count       = 0,
+    halfW       = Math.ceil(width / 2),
+    halfH       = Math.ceil(height / 2),
+    toRedraw,
+    color;
 
 var pctWhite    = 1,
     pause       = false,
     pxDim       = 1;
-
-var toRedraw, color;
 
 var c           = document.getElementById('mainFrame'),
     fr          = $('#mainFrame'),
@@ -70,33 +78,56 @@ $('#pctWhite').change(function(){
 });
 
 var displayVals = function(){
-    l.html(loop);
+    l.html(count);
     curHeight.html(height);
     curWidth.html(width);
     curWhite.html(pctWhite);
     curTime.html(time * 100);
 };
 
-var fulfill = function(){
-    for (var x = 0; x < width; x++) {
-        map[x] = {};
-        for (var y = 0; y < height; y++) {
-            var r = Math.floor((Math.random() * 100) + 1);
-            map[x][y] = (r <= pctWhite) ? {c: 'white'} : {c: 'black'};
+var showLoader = function(b, cb){
+    setTimeout(function(){
+        if(b){
+            $('#mainFrame').hide(0);
+            $('#loader').show(0);
+        }else{
+            $('#loader').hide(0);
+            $('#mainFrame').show(0);
         }
-    }
-    fr.attr('height', (height * pxDim));
-    fr.attr('width', (width * pxDim));
-    pos.x = Math.ceil(width / 2);
-    pos.y = Math.ceil(height / 2);
-    dir = up;
-    buildCanvas();
-    displayVals();
+        if(cb){
+            setTimeout(function(){ cb(); }, 500);
+        }
+    },0);
+};
+
+var fulfill = function(){
+    pause = true;
+    halfW = Math.ceil(width / 2);
+    halfH = Math.ceil(height / 2);
+    showLoader(true, function(){
+        for (var x = 0; x < width; x++) {
+            map[x] = {};
+            for (var y = 0; y < height; y++) {
+                var r = Math.floor((Math.random() * 100) + 1);
+                map[x][y] = (r <= pctWhite) ? {c: white} : {c: black};
+            }
+        }
+        fr.attr('height', (height * pxDim));
+        fr.attr('width', (width * pxDim));
+        pos.x = halfW;
+        pos.y = halfH;
+        dir = up;
+        buildCanvas(function(){
+            displayVals();
+            showLoader(false);
+            pause = false;
+        });
+    });
 };
 
 
 var fill = function(c, x, y){
-    ctx.fillStyle = c;
+    ctx.fillStyle = (c == black) ? 'black': 'white';
     ctx.fillRect((x * pxDim), (y * pxDim), pxDim, pxDim);
 };
 
@@ -139,11 +170,11 @@ var startTheGame = function(){
     color       = map[pos.x][pos.y].c;
     var x       = pos.x,
     y           = pos.y,
-    isWhite     = (color == white),
+    isWhite     = (color && white),
     dirAd       = (dir + 1),
     dirSub      = (dir - 1),
     newCol      = (isWhite) ? black : white;
-    dir         = (isWhite) ? ((dirAd > right) ? up : dirAd) : ((dirSub >= 1) ? dirSub : right)
+    dir         = (isWhite) ? ((dirAd > right) ? up : dirAd) : ((dirSub >= 1) ? dirSub : right);
     map[x][y].c = newCol;
     toRedraw    = {x: x, y: y, color: newCol};
     pos.x       = (dir == left) ? x - 1 : ((dir == right) ? x + 1 : x);
@@ -154,28 +185,29 @@ var startTheGame = function(){
     return;
 };
 
-
-var halfW = Math.ceil(width / 2), halfH = Math.ceil(height / 2);
-var count = 0;
 var again = function(){
     if(!map[pos.x] || !map[pos.x][pos.y]){
         pos.x = halfW;
         pos.y = halfH;
         setTimeout(function(){
-            l.html(loop);
-            startTheGame();
-        },0);
-    }
-    if((loop % stackLoop) === 0){
-        loop = 0;
-        //clear queue to not reach maximum call stack size.
-        setTimeout(function(){
             count += stackLoop;
             l.html(count);
             startTheGame();
-            halfW = Math.ceil(width / 2); halfH = Math.ceil(height / 2);
         },0);
-    }else{
-        startTheGame();
     }
+    if(loop == stackLoop){
+        loop = 0;
+        setTimeout(function(){ //clear queue to not reach maximum call stack size.
+            count += stackLoop;
+            l.html(count);
+            startTheGame();
+        },0);
+    }else startTheGame();
 };
+
+
+//auto init
+$(document).ready(function(){
+    $('#timer').val(stackLoop / 100);
+    fulfill();
+});
