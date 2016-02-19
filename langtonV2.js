@@ -38,93 +38,6 @@ var c           = document.getElementById('mainFrame'),
     curWhite    = $('#curWhite'),
     curTime     = $('#curTime');
 
-$('#fulfill').click(function(){fulfill();});
-$('#timer').change(function(){
-    time=$(this).val();
-    stackLoop = parseInt(time) * 100;
-    displayVals();
-});
-// $('#placeAnt').click(function(){placeAnt();});
-$('#start').click(function(){
-    pause = false;
-    startTheGame();
-});
-
-$('#stop').click(function(){
-    pause = true;
-});
-
-$('#zoom').change(function(){
-    fr.attr('height', (height * pxDim));
-    fr.attr('width', (width * pxDim));
-    pxDim = $(this).val();
-    displayVals();
-});
-$('#height').change(function(){
-    height = $(this).val();
-    displayVals();
-    fulfill();
-});
-$('#width').change(function(){
-    width = $(this).val();
-    displayVals();
-    fulfill();
-});
-$('#pctWhite').change(function(){
-    pctWhite = $(this).val();
-    displayVals();
-    fulfill();
-});
-
-var displayVals = function(){
-    l.html(count);
-    curHeight.html(height);
-    curWidth.html(width);
-    curWhite.html(pctWhite);
-    curTime.html(time * 100);
-};
-
-var showLoader = function(b, cb){
-    setTimeout(function(){
-        if(b){
-            $('#mainFrame').hide(0);
-            $('#loader').show(0);
-        }else{
-            $('#loader').hide(0);
-            $('#mainFrame').show(0);
-        }
-        if(cb){
-            setTimeout(function(){ cb(); }, 500);
-        }
-    },0);
-};
-
-var fulfill = function(){
-    pause = true;
-    halfW = Math.ceil(width / 2);
-    halfH = Math.ceil(height / 2);
-    showLoader(true, function(){
-        for (var x = 0; x < width; x++) {
-            map[x] = {};
-            for (var y = 0; y < height; y++) {
-                var r = Math.floor((Math.random() * 100) + 1);
-                map[x][y] = (r <= pctWhite) ? {c: white} : {c: black};
-            }
-        }
-        fr.attr('height', (height * pxDim));
-        fr.attr('width', (width * pxDim));
-        pos.x = halfW;
-        pos.y = halfH;
-        dir = up;
-        buildCanvas(function(){
-            displayVals();
-            showLoader(false);
-            pause = false;
-        });
-    });
-};
-
-
 var fill = function(c, x, y){
     ctx.fillStyle = (c == black) ? 'black': 'white';
     ctx.fillRect((x * pxDim), (y * pxDim), pxDim, pxDim);
@@ -200,8 +113,93 @@ var again = function(){
 };
 
 
-//auto init
+var displayVals = function(){
+    l.html(count);
+    curHeight.html(height);
+    curWidth.html(width);
+    curWhite.html(pctWhite);
+    curTime.html(time * 100);
+};
+
+var showLoader = function(b, cb){
+    setTimeout(function(){
+        if(b){
+            $('#mainFrame').hide(0);
+            $('#loader').show(0);
+        }else{
+            $('#loader').hide(0);
+            $('#mainFrame').show(0);
+        }
+        if(cb){
+            setTimeout(function(){ cb(); }, 500);
+        }
+    },0);
+};
+
+var fulfill = function(){
+    pause = true;
+    halfW = Math.ceil(width / 2);
+    halfH = Math.ceil(height / 2);
+    showLoader(true, function(){
+        for (var x = 0; x < width; x++) {
+            map[x] = {};
+            for (var y = 0; y < height; y++) {
+                var r = Math.floor((Math.random() * 100) + 1);
+                map[x][y] = (r <= pctWhite) ? {c: white} : {c: black};
+            }
+        }
+        fr.attr('height', (height * pxDim));
+        fr.attr('width', (width * pxDim));
+        pos.x = halfW;
+        pos.y = halfH;
+        dir = up;
+        buildCanvas(function(){
+            displayVals();
+            showLoader(false);
+            pause = false;
+        });
+    });
+};
+
+
 $(document).ready(function(){
     $('#timer').val(stackLoop / 100);
     fulfill();
+    $('#fulfill').click(function(){fulfill();});
+    $('#timer').change(function(){
+        time=$(this).val();
+        stackLoop = parseInt(time) * 100;
+        displayVals();
+    });
+    // $('#placeAnt').click(function(){placeAnt();});
+    $('#start').click(function(){
+        pause = false;
+        startTheGame();
+    });
+
+    $('#stop').click(function(){
+        pause = true;
+    });
+
+    $('#zoom').change(function(){
+        fr.attr('height', (height * pxDim));
+        fr.attr('width', (width * pxDim));
+        pxDim = $(this).val();
+        displayVals();
+    });
+    $('#height').change(function(){
+        height = $(this).val();
+        displayVals();
+        fulfill();
+    });
+    $('#width').change(function(){
+        width = $(this).val();
+        displayVals();
+        fulfill();
+    });
+    $('#pctWhite').change(function(){
+        pctWhite = $(this).val();
+        displayVals();
+        fulfill();
+    });
 });
