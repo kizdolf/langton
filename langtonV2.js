@@ -1,7 +1,7 @@
 'use strict';
 
-var height      = 800,
-    width       = 1500,
+var height      = 830,
+    width       = 1920,
     black       = 'black',
     white       = 'white',
     antColor    = 'red',
@@ -16,7 +16,7 @@ var height      = 800,
     time        = null,
     stackLoop   = 300;
 
-var pctWhite    = 100,
+var pctWhite    = 1,
     pause       = false,
     pxDim       = 1;
 
