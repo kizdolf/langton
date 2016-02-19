@@ -23,11 +23,10 @@ var height      = maxH,
     count       = 0,
     halfW       = Math.ceil(width / 2),
     halfH       = Math.ceil(height / 2),
-    toRedraw,
+    pause       = false,
     color;
 
 var pctWhite    = 1,
-    pause       = false,
     pxDim       = 1;
 
 var c           = document.getElementById('mainFrame'),
@@ -140,15 +139,17 @@ var buildCanvas = function(cb){
     if(cb) cb();
 };
 
-var placeAnt = function(){ fill(antColor, pos.x, pos.y); };
+var placeAnt = function(){ 
+    ctx.fillStyle = antColor;
+    ctx.fillRect((pos.x * pxDim), (pos.y * pxDim), pxDim, pxDim);
+};
 
 /*
     Call loop:
   →→startTheGame ->
   ↑     determine new direction and color.
-  ↑     reDraw ->
-  ↑         fill -> draw one pixel
-  ↑         fill -> draw one pixel
+  ↑     placeAnt() -> draw ant
+  ↑     fill -> draw changed pixel
   ↑     again ->
   ↑         if(border reached or callStackMax) ->
   ↑             handle ant position.
@@ -159,28 +160,22 @@ var placeAnt = function(){ fill(antColor, pos.x, pos.y); };
   ←←←←←←←←←←←←←←startTheGame
 
 */
-
-var reDraw = function(r){
-    fill(antColor, pos.x, pos.y);
-    fill(r.color, r.x, r.y);
-};
-
+// pos = (dir == left) ? {x: x - 1, y: y} : (dir == right) ? {x: x + 1, y: y} : (dir == up) ? {x: x, y: y - 1} : {x: x, y: y + 1};
+// not sure it's faster.
 var startTheGame = function(){
-    color       = map[pos.x][pos.y].c;
     var x       = pos.x,
-    y           = pos.y,
-    isWhite     = (color && white),
-    dirAd       = (dir << 1),
-    dirSub      = (dir >> 1),
-    newCol      = (isWhite) ? black : white;
-    dir         = (isWhite) ? ((dirAd > right) ? up : dirAd) : ((dirSub >= 1) ? dirSub : right);
-    map[x][y].c = newCol;
-    toRedraw    = {x: x, y: y, color: newCol};
+        y       = pos.y,
+        dirAd   = dir << 1,
+        dirSub  = dir >> 1;
+    color       = map[x][y].c;
+    dir         = (color && white) ? ((dirAd > right) ? up : dirAd) : ((dirSub >= 1) ? dirSub : right);
+    map[x][y].c = !color;
     pos.x       = (dir == left) ? x - 1 : ((dir == right) ? x + 1 : x);
     pos.y       = (dir == up)   ? y - 1 : ((dir == bot)   ? y + 1 : y);
-    reDraw(toRedraw);
+    placeAnt();
+    fill((!color), x, y);
     ++loop;
-    if(!pause) again();
+    pause||again(); //jshint ignore:line
     return;
 };
 
